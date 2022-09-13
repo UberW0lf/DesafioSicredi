@@ -1,12 +1,15 @@
 package com.teste.desafio.Service;
 
+import com.teste.desafio.CpfClient;
 import com.teste.desafio.entity.Pauta;
 import com.teste.desafio.entity.Sessao;
 import com.teste.desafio.entity.VotoAssociado;
 import com.teste.desafio.repository.PautaRepository;
 import com.teste.desafio.repository.SessaoRepository;
 import com.teste.desafio.repository.VotoAssociadoRepository;
+import com.teste.desafio.response.ResponseCpfClient;
 import com.teste.desafio.response.ResponseResultadoVoto;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,9 @@ public class AssembleiaService {
 
     @Autowired
     private final VotoAssociadoRepository votoAssociadoRepository;
+
+    @Autowired
+    private final CpfClient cpfClient;
 
 
     public static final Long DEFAULT_LIMITE = 1L;
@@ -59,6 +66,18 @@ public class AssembleiaService {
     }
 
     public String votoPauta(String cpf, String nomePauta, String voto){
+        ResponseCpfClient ableToVote;
+        try{
+            ableToVote = cpfClient.validaVotoPorCpf(cpf);
+        }catch (FeignException fe){
+            if(fe.status() == 404){
+                throw new RuntimeException("Formato de cpf inválido " + fe.getMessage());
+            }
+            throw new RuntimeException(fe.getMessage());
+        }
+        if(ableToVote.getStatus().equals("UNABLE_TO_VOTE")) {
+            throw new RuntimeException("Associado com cpf inválido");
+        }
         Pauta pauta = pautaRepository.getPautaByNome(nomePauta)
                 .orElseThrow(() -> new RuntimeException("Pauta não existe"));
         Sessao sessao = sessaoRepository.getSessaoById(pauta.getId())

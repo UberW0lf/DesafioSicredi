@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +48,7 @@ public class AssembleiaController {
     }
 
 
-    @PostMapping(path = "/resultado-pauta")
+    @GetMapping(path = "/resultado-pauta")
     @Operation(summary = "Resultado pauta")
     public ResponseEntity<ResponseResultadoVoto> resultadoPauta(@RequestBody RequestCadastrarPauta requestCadastrarPauta){
         return new ResponseEntity<>(assembleiaService.resultadoVoto(requestCadastrarPauta.getPauta()), HttpStatus.OK);
