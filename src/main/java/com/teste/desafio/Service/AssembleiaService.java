@@ -11,6 +11,7 @@ import com.teste.desafio.response.ResponseCpfClient;
 import com.teste.desafio.response.ResponseResultadoVoto;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AssembleiaService {
     @Autowired
     private final PautaRepository pautaRepository;
@@ -38,9 +40,12 @@ public class AssembleiaService {
 
     public static final Long DEFAULT_LIMITE = 1L;
     public Pauta cadastrarPauta(String nome){
+        log.info("Entrando no cadastro de pauta");
         if (pautaRepository.getPautaByNome(nome).isPresent()){
+            log.error("Pauta " + nome + "Já cadastrada");
             throw new RuntimeException("Pauta ja cadastrada");
         }
+        log.info("Pauta " + nome + "Cadastrada com sucesso");
         return pautaRepository.save(new Pauta()
                                             .toBuilder()
                                             .nome(nome)
